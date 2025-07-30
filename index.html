@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Roleta de Números</title>
+  <title>Roleta de Númerros</title>
   <style>
     * {
       box-sizing: border-box;
@@ -11,13 +11,13 @@
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: radial-gradient(circle at center, #1f1c2c, #928dab);
-      color: white;
+      background: linear-gradient(to bottom, #fdf0d5, #ffeccc);
+      color: #6b4226;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      height: 100vh;
+      min-height: 100vh;
     }
 
     .logo {
@@ -29,22 +29,24 @@
     }
 
     .controls {
-      background: rgba(0,0,0,0.2);
+      background: #ffffffdd;
       padding: 20px 30px;
       border-radius: 12px;
       margin-top: 20px;
       text-align: center;
-      box-shadow: 0 0 15px rgba(0,0,0,0.3);
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
     }
 
     input {
       padding: 10px;
-      border: none;
+      border: 2px solid #ff8c42;
       border-radius: 6px;
       margin: 0 5px;
       width: 80px;
       font-size: 16px;
       text-align: center;
+      background-color: #fff;
+      color: #6b4226;
     }
 
     button {
@@ -54,21 +56,22 @@
       font-weight: bold;
       border: none;
       border-radius: 10px;
-      background-color: #00c9a7;
+      background-color: #e63946;
       color: white;
       cursor: pointer;
       transition: background 0.3s;
     }
 
     button:hover {
-      background-color: #00a88a;
+      background-color: #cc2b39;
     }
 
     .wheel-container {
-      position: relative;
       width: 400px;
       height: 400px;
       margin-top: 30px;
+      position: relative;
+      flex-shrink: 0;
     }
 
     .pointer {
@@ -80,7 +83,7 @@
       height: 0;
       border-left: 20px solid transparent;
       border-right: 20px solid transparent;
-      border-bottom: 30px solid #fff;
+      border-bottom: 30px solid #6b4226;
       z-index: 2;
     }
 
@@ -88,15 +91,21 @@
       width: 100%;
       height: 100%;
       border-radius: 50%;
-      border: 8px solid #fff;
+      border: 8px solid #f4d35e;
       position: relative;
       overflow: hidden;
       transition: transform 5s ease-out;
-      background: conic-gradient(#00c9a7, #845ec2, #00c9a7, #845ec2);
+      background: conic-gradient(
+        #ff8c42,
+        #f4d35e,
+        #e63946,
+        #f4d35e,
+        #ff8c42
+      );
     }
 
     .wheel span {
-      display: none; /* números ocultos */
+      display: none;
     }
 
     #winner {
@@ -104,14 +113,15 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background: #ffffffdd;
-      color: #1f1c2c;
+      background: #ffffffec;
+      color: #6b4226;
       font-size: 50px;
       font-weight: bold;
       padding: 20px 40px;
       border-radius: 20px;
       display: none;
       z-index: 10;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
     }
   </style>
 </head>
@@ -124,9 +134,9 @@
   <div class="controls">
     <h2>🎯 Roleta de Números</h2>
     <input type="number" id="min" placeholder="Mínimo">
-    <input type="number" id="max" placeholder="Máximo">
-    <br>
-    <button onclick="spin()">Girar Roleta</button>
+    <input type="number" id="max" placeholder="Máximo"><br>
+    <button onclick="spin()">🎲 Girar Roleta</button>
+    <button onclick="gravarTela()">🎥 Gravar Tela</button>
   </div>
 
   <div class="wheel-container">
@@ -149,7 +159,7 @@
         const angle = i * anglePer;
         const sector = document.createElement('span');
         sector.style.transform = `rotate(${angle}deg) translate(0, -100%)`;
-        sector.style.background = i % 2 === 0 ? '#00c9a7' : '#845ec2';
+        sector.style.background = i % 2 === 0 ? '#f4d35e' : '#ff8c42';
         wheel.appendChild(sector);
       }
     }
@@ -180,6 +190,32 @@
         winnerDisplay.innerText = `🎉 ${number}`;
         winnerDisplay.style.display = 'block';
       }, 5000);
+    }
+
+    let recorder;
+    let chunks = [];
+
+    async function gravarTela() {
+      try {
+        const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+        recorder = new MediaRecorder(stream);
+        chunks = [];
+
+        recorder.ondataavailable = e => chunks.push(e.data);
+        recorder.onstop = () => {
+          const blob = new Blob(chunks, { type: 'video/webm' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'roleta-gravada.webm';
+          a.click();
+        };
+
+        recorder.start();
+        alert('🔴 Gravação iniciada. Para encerrar, clique em "Parar Compartilhamento" no topo da tela.');
+      } catch (err) {
+        alert('Erro ao iniciar gravação: ' + err.message);
+      }
     }
   </script>
 </body>
